@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { RolesModule } from './roles/roles.module';
 import { CompaniesModule } from './companies/companies.module';
 import { AdminModule } from './admin/admin.module';
+import { IssuesModule } from './issues/issues.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AdminModule } from './admin/admin.module';
     RolesModule,
     CompaniesModule,
     AdminModule,
+    IssuesModule,
   ],
   controllers: [AppController],
   providers: [

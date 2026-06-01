@@ -98,7 +98,7 @@ export class AuthService {
         const roles =
             await this.userRoleRepository.find({
                 where: {
-                    userId: user.id,
+                    user: { id: user.id },
                 },
             });
         const roleNames =
