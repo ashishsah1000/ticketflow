@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { BACKEND_URL } from '../../constant';
 import { useAuth } from '../../context/AuthContext';
 
 const Signup = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Initialize from location.state if available
+  const initialPhone = location.state?.phone || '';
+  const initialError = location.state?.message || null;
+
   const [formData, setFormData] = useState({
     firstname: '',
     lastname: '',
     email: '',
-    phone: '',
+    phone: initialPhone,
     password: '',
   });
 
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(initialError);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
 
   if (isAuthenticated) {
     navigate('/');

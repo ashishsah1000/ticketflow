@@ -41,14 +41,16 @@ export class IssuesService {
     return savedIssue;
   }
 
-  async findAllByUserId(userId: string) {
+  async findAllByUserId(userId: string, limit: number = 100, offset: number = 0) {
     return this.issueRepository.find({
       where: { user_id: userId },
-      order: { created_at: 'DESC' },
+      order: { escalation: 'DESC', created_at: 'DESC' },
+      take: limit,
+      skip: offset,
     });
   }
 
-  async findAllForEmployee(statusFilter?: string) {
+  async findAllForEmployee(statusFilter?: string, limit: number = 100, offset: number = 0) {
     const whereCondition = statusFilter ? { status: statusFilter } : {};
     
     return this.issueRepository.find({
@@ -56,8 +58,10 @@ export class IssuesService {
       relations: ['user'],
       order: {
         escalation: 'DESC',
-        created_at: 'ASC'
-      }
+        created_at: 'DESC'
+      },
+      take: limit,
+      skip: offset,
     });
   }
 

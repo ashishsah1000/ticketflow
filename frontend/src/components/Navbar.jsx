@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaUserTie, FaHeadset, FaUser, FaSignOutAlt, FaCog, FaChartPie, FaUserShield } from 'react-icons/fa';
+import { FaUserTie, FaHeadset, FaUser, FaSignOutAlt, FaCog, FaChartPie, FaUserShield, FaChartLine } from 'react-icons/fa';
 
 export const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -44,13 +45,29 @@ export const Navbar = () => {
           <div className="flex items-center gap-5">
 
             {canViewAnalytics && (
-              <Link to="/manager/analytics">
+              <Link
+                to="/manager/analytics"
+                className={`hidden md:flex items-center gap-2 font-semibold transition-colors px-3 py-2 rounded-xl ${location.pathname === '/manager/analytics'
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50'
+                  }`}
+              >
+                <FaChartLine />
+
                 Analytics
               </Link>
             )}
 
             {canViewDashboard && (
-              <Link to="/dashboard">
+              <Link
+                to="/dashboard"
+                className={`hidden sm:flex items-center gap-2 font-semibold transition-colors px-3 py-2 rounded-xl ${location.pathname.startsWith('/dashboard')
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50'
+                  }`}
+              >
+                <FaChartPie />
+
                 Dashboard
               </Link>
             )}
@@ -65,8 +82,11 @@ export const Navbar = () => {
             {/* Profile Dropdown */}
             <div className="dropdown dropdown-end">
               <label tabIndex={0} className="btn btn-ghost btn-circle avatar border-2 border-slate-100 hover:border-blue-200 transition-colors">
-                <div className="w-10 rounded-full bg-gradient-to-tr from-blue-100 to-blue-50 flex items-center justify-center text-blue-700 font-black text-lg">
-                  {user?.firstname?.charAt(0)?.toUpperCase() || user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                <div className="w-10  rounded-full bg-gradient-to-tr from-blue-100 to-blue-50 flex flex-col items-center justify-center text-blue-700 font-black text-lg">
+                  <span className='relative top-1'>
+                    {user?.firstname?.charAt(0)?.toUpperCase() || user?.name?.charAt(0)?.toUpperCase() || 'U'}
+
+                  </span>
                 </div>
               </label>
               <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow-xl menu menu-sm dropdown-content bg-white rounded-xl w-56 border border-slate-100">
@@ -74,7 +94,7 @@ export const Navbar = () => {
                   <p className="text-sm font-bold text-slate-800 truncate">{user?.firstname} {user?.lastname}</p>
                   <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                 </div>
-
+                {/* 
                 <li>
                   <Link to="/profile" className="flex items-center gap-3 text-slate-700 hover:text-blue-600 hover:bg-slate-50 py-2">
                     <FaUser className="text-slate-400" /> My Profile
@@ -84,7 +104,7 @@ export const Navbar = () => {
                   <a className="flex items-center gap-3 text-slate-700 hover:text-blue-600 hover:bg-slate-50 py-2">
                     <FaCog className="text-slate-400" /> Settings
                   </a>
-                </li>
+                </li> */}
 
                 {isAdmin && (
                   <li>

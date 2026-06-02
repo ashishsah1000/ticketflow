@@ -14,8 +14,12 @@ export class IssuesController {
 
   @Get('all')
   @UseGuards(EmployeeGuard)
-  async findAllForEmployee(@Query('status') status?: string) {
-    return this.issuesService.findAllForEmployee(status);
+  async findAllForEmployee(
+    @Query('status') status?: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number
+  ) {
+    return this.issuesService.findAllForEmployee(status, limit ? Number(limit) : undefined, offset ? Number(offset) : undefined);
   }
 
   @Get(':id')
@@ -49,7 +53,11 @@ export class IssuesController {
   }
 
   @Get()
-  async findAll(@Req() req: any) {
-    return this.issuesService.findAllByUserId(req.user.id);
+  async findAll(
+    @Req() req: any,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number
+  ) {
+    return this.issuesService.findAllByUserId(req.user.id, limit ? Number(limit) : undefined, offset ? Number(offset) : undefined);
   }
 }

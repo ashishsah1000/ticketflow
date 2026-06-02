@@ -3,12 +3,14 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { BACKEND_URL } from '../../constant';
 import { IssueCard } from '../../features/issues/IssueCard';
+import { DropView } from '../../features/issues/DropView';
 
 export const EmployeeDashboard = () => {
   const { token } = useAuth();
   const [issues, setIssues] = useState([]);
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('grid');
 
   useEffect(() => {
     fetchIssues(statusFilter);
@@ -43,8 +45,36 @@ export const EmployeeDashboard = () => {
   const closedIssues = issues.filter(i => i.status === 'closed').length;
   const highPriority = issues.filter(i => i.escalation >= 4 && i.status !== 'closed').length;
 
+  const handleStatusChange = async (issueId, newStatus) => {
+    // Optimistic update
+    const previousIssues = [...issues];
+    setIssues(issues.map(issue =>
+      issue.id === issueId ? { ...issue, status: newStatus } : issue
+    ));
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/issues/${issueId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update status');
+      }
+      toast.success(`Status updated to ${newStatus}`);
+    } catch (err) {
+      // Revert on error
+      setIssues(previousIssues);
+      toast.error('Failed to update status');
+    }
+  };
+
   return (
-    <div className="space-y-6 px-8 mt-4">
+    <div className="space-y-6 px-8 mt-4 w-full">
       {/* Informational Alert */}
       <div className="alert alert-info bg-blue-50 border-blue-100 text-blue-800 flex items-start gap-3 shadow-sm rounded-xl">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
@@ -81,20 +111,44 @@ export const EmployeeDashboard = () => {
       </div>
 
       {/* Controls */}
-      <div className="flex justify-between items-center bg-base-100 p-4 rounded-xl shadow-sm border border-slate-200">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-base-100 p-4 rounded-xl shadow-sm border border-slate-200">
         <h2 className="text-xl font-bold text-slate-800">Assigned Issues</h2>
-        <div className="flex items-center gap-3">
-          <label className="font-semibold text-xs text-slate-500 uppercase tracking-wide">Filter Status:</label>
-          <select
-            className="select select-bordered select-sm w-48 font-medium text-slate-700"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Issues</option>
-            <option value="raised">Raised</option>
-            <option value="processing">Processing</option>
-            <option value="closed">Closed</option>
-          </select>
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          {/* View Toggle */}
+          <div className="join bg-base-200 p-1 rounded-lg">
+            <button
+              className={`join-item btn btn-sm ${viewMode === 'grid' ? 'btn-active btn-primary' : 'btn-ghost'}`}
+              onClick={() => setViewMode('grid')}
+              title="Grid View"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+              </svg>
+            </button>
+            <button
+              className={`join-item btn btn-sm ${viewMode === 'board' ? 'btn-active btn-primary' : 'btn-ghost'}`}
+              onClick={() => setViewMode('board')}
+              title="Board View"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 4.5v15m6-15v15m-10.5-6h15m-15-6h15m-15-6h15" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="font-semibold text-xs text-slate-500 uppercase tracking-wide hidden sm:block">Filter Status:</label>
+            <select
+              className="select select-bordered select-sm w-36 font-medium text-slate-700"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">All Issues</option>
+              <option value="raised">Raised</option>
+              <option value="processing">Processing</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -106,12 +160,14 @@ export const EmployeeDashboard = () => {
         <div className="text-center p-12 bg-base-100 rounded-xl">
           <p className="text-gray-500">No issues found matching the criteria.</p>
         </div>
-      ) : (
+      ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {issues.map(issue => (
             <IssueCard key={issue.id} issue={issue} />
           ))}
         </div>
+      ) : (
+        <DropView issues={issues} onStatusChange={handleStatusChange} />
       )}
     </div>
   );

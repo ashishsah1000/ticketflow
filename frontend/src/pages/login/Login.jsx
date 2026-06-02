@@ -5,7 +5,7 @@ import { BACKEND_URL } from '../../constant';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
+    identifier: '',
     password: '',
   });
 
@@ -32,8 +32,8 @@ const Login = () => {
     setError(null);
 
     // Front-end validations
-    if (!formData.email.trim() || !formData.password.trim()) {
-      setError('Email and password are required.');
+    if (!formData.identifier.trim() || !formData.password.trim()) {
+      setError('Email/Phone and password are required.');
       setLoading(false);
       return;
     }
@@ -50,7 +50,12 @@ const Login = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Invalid email or password.');
+        if (data.message === 'User not found' && (/^\d+$/.test(formData.identifier) || formData.identifier.startsWith('+'))) {
+          // Redirect to signup
+          navigate('/signup', { state: { message: 'User not found please signup', phone: formData.identifier } });
+          return;
+        }
+        throw new Error(data.message || 'Login failed');
       }
 
       const success = login(data.access_token);
@@ -91,17 +96,17 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="form-control w-full">
               <label className="label">
-                <span className="label-text font-semibold text-slate-500 text-xs uppercase tracking-wider">Email Address</span>
+                <span className="label-text font-semibold text-slate-500 text-xs uppercase tracking-wider">Email or Phone Number</span>
               </label>
               <input
-                type="email"
-                name="email"
-                value={formData.email}
+                type="text"
+                name="identifier"
+                value={formData.identifier}
                 onChange={handleChange}
                 required
                 disabled={loading}
                 className="input input-bordered w-full text-slate-800 text-sm focus:outline-none"
-                placeholder="john.doe@example.com"
+                placeholder="john.doe@example.com or +1234567890"
               />
             </div>
 

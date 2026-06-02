@@ -85,15 +85,20 @@ export class AuthService {
 
 
     async login(loginDto: LoginDto) {
-        const user = await this.findByEmailWithPassword(
-            loginDto.email,
-        );
+        const identifier = loginDto.identifier;
+        let user;
+        const isPhone = /^\d+$/.test(identifier) || identifier.startsWith('+');
 
-
-        if (!user) {
-            throw new UnauthorizedException(
-                'Invalid email or password',
-            );
+        if (isPhone) {
+            user = await this.findByPhoneWithPassword(identifier);
+            if (!user) {
+                throw new UnauthorizedException('User not found');
+            }
+        } else {
+            user = await this.findByEmailWithPassword(identifier);
+            if (!user) {
+                throw new UnauthorizedException('Invalid email or password');
+            }
         }
         const roles =
             await this.userRoleRepository.find({
@@ -154,6 +159,18 @@ export class AuthService {
             .addSelect('user.password')
             .where('user.email = :email', {
                 email,
+            })
+            .getOne();
+    }
+
+    async findByPhoneWithPassword(
+        phone: string,
+    ) {
+        return this.userRepository
+            .createQueryBuilder('user')
+            .addSelect('user.password')
+            .where('user.phone = :phone', {
+                phone,
             })
             .getOne();
     }
