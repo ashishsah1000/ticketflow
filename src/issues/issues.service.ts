@@ -74,6 +74,15 @@ export class IssuesService {
     return issue;
   }
 
+  async findByTokenId(tokenId: string) {
+    const issue = await this.issueRepository.findOne({
+      where: { tokenId },
+      relations: ['user']
+    });
+    if (!issue) throw new NotFoundException('Issue not found');
+    return issue;
+  }
+
   async getActivities(id: string) {
     return this.activityRepository.find({
       where: { issue_id: id },

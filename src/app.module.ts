@@ -11,6 +11,7 @@ import { RolesModule } from './roles/roles.module';
 import { CompaniesModule } from './companies/companies.module';
 import { AdminModule } from './admin/admin.module';
 import { IssuesModule } from './issues/issues.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { IssuesModule } from './issues/issues.module';
     CompaniesModule,
     AdminModule,
     IssuesModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [

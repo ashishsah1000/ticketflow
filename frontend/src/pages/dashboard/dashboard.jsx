@@ -5,6 +5,7 @@ import { IssueForm } from '../../features/forms/IssueForm';
 import EmployeeDashboard from './EmployeeDashboard';
 import { ManagerConsole } from '../../components';
 import { FaTicketAlt, FaPlusCircle } from 'react-icons/fa';
+import { ChatWidget } from '../../features/chat/ChatWidget';
 
 export const Dashboard = () => {
     const { user } = useAuth();
@@ -98,6 +99,7 @@ export const Dashboard = () => {
                     )}
                 </div>
             </div>
+            <ChatWidget />
         </div>
     );
 };

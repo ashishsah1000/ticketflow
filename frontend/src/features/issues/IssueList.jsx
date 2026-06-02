@@ -91,7 +91,7 @@ export const IssueList = () => {
         } else {
           setIssues(prev => [...prev, ...data]);
         }
-        
+
         if (data.length < LIMIT) {
           setHasMore(false);
         } else {
@@ -138,11 +138,11 @@ export const IssueList = () => {
             <p className="text-slate-500 mt-3 max-w-md font-medium leading-relaxed relative z-10">You haven't logged any support requests. If you need help with a product, click on "New Request" above to get started.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
             {issues.map(issue => (
               <div
                 key={issue.id}
-                className="group relative w-[400px] bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-xl hover:-translate-y-1 hover:border-blue-200 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col h-full"
+                className="group relative w-[350px] bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-xl hover:-translate-y-1 hover:border-blue-200 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col h-full"
                 onClick={() => openSidebar(issue)}
               >
                 {/* Decorative background blob */}
@@ -199,10 +199,10 @@ export const IssueList = () => {
             ))}
           </div>
         )}
-        
+
         {issues.length > 0 && hasMore && (
           <div className="flex justify-center mt-8 pb-8">
-            <button 
+            <button
               onClick={loadMore}
               className="px-6 py-2.5 bg-white border border-slate-200 shadow-sm rounded-full text-sm font-bold text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:shadow-md transition-all active:scale-95"
             >

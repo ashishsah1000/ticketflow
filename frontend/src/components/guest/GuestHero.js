@@ -34,9 +34,9 @@ const GuestHero = () => {
           </p>
           
           {/* Central Search Bar */}
-          <div className="mb-10 max-w-md mx-auto lg:mx-0">
+          {/* <div className="mb-10 max-w-md mx-auto lg:mx-0">
             <TicketSearch />
-          </div>
+          </div> */}
           
           <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start items-center">
             <span className="text-sm text-slate-200 font-medium drop-shadow-md">Need to report a new problem?</span>
