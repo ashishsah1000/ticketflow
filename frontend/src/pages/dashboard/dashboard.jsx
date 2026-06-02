@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { IssueList } from '../../features/issues/IssueList';
 import { IssueForm } from '../../features/forms/IssueForm';
@@ -6,10 +6,25 @@ import EmployeeDashboard from './EmployeeDashboard';
 import { ManagerConsole } from '../../components';
 import { FaTicketAlt, FaPlusCircle } from 'react-icons/fa';
 import { ChatWidget } from '../../features/chat/ChatWidget';
+import { BACKEND_URL } from '../../constant';
 
 export const Dashboard = () => {
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const [activeTab, setActiveTab] = useState('list');
+    const [userStatus, setUserStatus] = useState(user?.status || 'active');
+
+    useEffect(() => {
+        if (token && !user?.admin && !user?.roles?.includes('employee') && !user?.roles?.includes('manager')) {
+            fetch(`${BACKEND_URL}/auth/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.status) setUserStatus(data.status);
+            })
+            .catch(console.error);
+        }
+    }, [token, user]);
 
     const isEmployee = user?.roles?.includes('employee') || user?.admin;
     const isManager = user?.roles?.includes('manager') || user?.admin;
@@ -63,14 +78,18 @@ export const Dashboard = () => {
                             My Tickets
                         </button>
                         <button
-                            onClick={() => setActiveTab('new')}
+                            onClick={() => {
+                                if (userStatus !== 'disabled') setActiveTab('new');
+                            }}
+                            disabled={userStatus === 'disabled'}
                             className={`flex items-center gap-2.5 px-6 py-3 rounded-xl font-bold transition-all duration-300 ${activeTab === 'new'
                                 ? 'bg-white text-emerald-700 shadow-sm border border-slate-100 scale-100'
                                 : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 scale-95 opacity-80 hover:opacity-100'
-                                }`}
+                                } ${userStatus === 'disabled' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            title={userStatus === 'disabled' ? 'Your account is restricted from creating new issues' : ''}
                         >
                             <FaPlusCircle className={`text-lg ${activeTab === 'new' ? 'text-emerald-500' : 'text-slate-400'}`} />
-                            New Request
+                            {userStatus === 'disabled' ? 'Account Restricted' : 'New Request'}
                         </button>
                     </div>
                 </div>

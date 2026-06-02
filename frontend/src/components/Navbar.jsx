@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaUserTie, FaHeadset, FaUser, FaSignOutAlt, FaCog, FaChartPie, FaUserShield, FaChartLine } from 'react-icons/fa';
+import { FaUserTie, FaHeadset, FaUser, FaSignOutAlt, FaCog, FaChartPie, FaUserShield, FaChartLine, FaImage, FaStore } from 'react-icons/fa';
 
 export const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -40,10 +40,20 @@ export const Navbar = () => {
         </Link>
       </div>
 
+
       <div className="navbar-end gap-3 flex items-center">
         {isAuthenticated ? (
           <div className="flex items-center gap-5">
-
+            <Link
+              to="/products"
+              className={`flex items-center gap-2 font-semibold transition-colors px-4 py-2 rounded-xl ${location.pathname.startsWith('/products')
+                ? 'bg-blue-50 text-blue-700'
+                : 'text-slate-600 hover:text-blue-600 hover:bg-slate-50'
+                }`}
+            >
+              <FaStore />
+              Products
+            </Link>
             {canViewAnalytics && (
               <Link
                 to="/manager/analytics"

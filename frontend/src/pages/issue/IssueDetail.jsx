@@ -216,79 +216,155 @@ export const IssueDetail = () => {
   }
 
   return (
-    <div className="h-screen w-full flex flex-col lg:flex-row bg-base-200 p-4 gap-4 overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col xl:flex-row bg-slate-50 p-4 md:p-6 lg:p-8 gap-6">
       {/* Left Side (Details & Controls) */}
-      <div className="w-full lg:w-1/2 bg-base-100 rounded-xl shadow-md flex flex-col border border-base-300 overflow-y-auto">
+      <div className="w-full xl:w-[45%] flex flex-col gap-6">
+        
+        {/* Main Details Card */}
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200/60 overflow-hidden flex flex-col">
 
-        {/* Sticky Header */}
-        <div className="sticky top-0 z-10 bg-base-100/95 backdrop-blur border-b border-base-200 p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <button onClick={() => navigate('/dashboard')} className="btn btn-circle btn-ghost btn-sm bg-base-200 hover:bg-base-300">
-              <FaArrowLeft className="text-slate-600" />
-            </button>
-            <h1 className="text-2xl font-bold text-slate-800 flex-1 truncate">
-              {issue.device || issue.issue_with_device}
-            </h1>
-            {issue.tokenId && (
-              <div
-                className="badge badge-primary badge-outline flex items-center gap-2 font-mono text-sm py-3 px-4 shadow-sm cursor-pointer hover:bg-primary/10 transition-colors"
-                title="Copy Token ID"
-                onClick={() => {
-                  navigator.clipboard.writeText(issue.tokenId);
-                  toast.success('Token ID copied!');
-                }}
-              >
-                #{issue.tokenId} <FaCopy />
+        {/* Header Section */}
+        <div className="bg-white p-6 md:p-8 border-b border-slate-100">
+          <div className="flex items-start md:items-center justify-between gap-4 flex-col md:flex-row mb-6">
+            <div className="flex items-center gap-4">
+              <button onClick={() => navigate('/dashboard')} className="btn btn-circle btn-sm bg-slate-100 hover:bg-slate-200 border-none shadow-none">
+                <FaArrowLeft className="text-slate-600" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-black text-slate-800 tracking-tight line-clamp-1">
+                  {issue.device || issue.issue_with_device}
+                </h1>
+                {issue.tokenId && (
+                  <div className="flex items-center gap-2 mt-1.5 text-sm font-medium text-slate-500">
+                    <span>Token ID:</span>
+                    <span 
+                      className="font-mono bg-blue-50 text-blue-600 px-2 py-0.5 rounded cursor-pointer hover:bg-blue-100 transition-colors flex items-center gap-1.5"
+                      onClick={() => {
+                        navigator.clipboard.writeText(issue.tokenId);
+                        toast.success('Token ID copied!');
+                      }}
+                      title="Copy Token ID"
+                    >
+                      #{issue.tokenId} <FaCopy className="text-xs" />
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           <div className="flex gap-3">
-            <button onClick={() => handleAction('call')} className="btn btn-success flex-1 text-white shadow-sm hover:shadow-md transition-all">
+            <button onClick={() => handleAction('call')} className="btn flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 hover:border-emerald-300 shadow-sm transition-all rounded-xl">
               <FaPhone /> Log Call
             </button>
-            <button onClick={() => handleAction('mail')} className="btn btn-info flex-1 text-white shadow-sm hover:shadow-md transition-all">
+            <button onClick={() => handleAction('mail')} className="btn flex-1 bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200 hover:border-purple-300 shadow-sm transition-all rounded-xl">
               <FaEnvelope /> Log Mail
             </button>
           </div>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 space-y-8">
+        <div className="p-6 md:p-8 space-y-8 bg-slate-50/30">
 
           {/* Customer & Issue Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-blue-50/50 p-5 rounded-xl border border-blue-100">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-800 mb-3 flex items-center gap-2">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4 flex items-center gap-2">
                 Customer Details
               </h3>
-              <div className="space-y-2 text-sm text-slate-700">
-                <p className="flex justify-between"><span className="text-slate-500">Name</span> <span className="font-semibold">{issue.user?.firstname} {issue.user?.lastname}</span></p>
-                <p className="flex justify-between"><span className="text-slate-500">Email</span> <span className="font-semibold truncate ml-4">{issue.user?.email}</span></p>
-                <p className="flex justify-between"><span className="text-slate-500">Phone</span> <span className="font-semibold">{issue.user?.phone}</span></p>
+              <div className="space-y-3 text-sm text-slate-700">
+                <div className="flex justify-between items-center"><span className="text-slate-400 font-medium">Name</span> <span className="font-bold text-slate-800">{issue.user?.firstname} {issue.user?.lastname}</span></div>
+                <div className="flex justify-between items-center"><span className="text-slate-400 font-medium">Email</span> <span className="font-bold text-slate-800 truncate ml-4" title={issue.user?.email}>{issue.user?.email}</span></div>
+                <div className="flex justify-between items-center"><span className="text-slate-400 font-medium">Phone</span> <span className="font-bold text-slate-800">{issue.user?.phone}</span></div>
               </div>
+              
+              {isManager && issue.user?.status !== 'disabled' && (
+                <div className="mt-5 pt-4 border-t border-slate-100">
+                  <button 
+                    onClick={async () => {
+                      if (window.confirm('Are you sure you want to block this user from creating new issues?')) {
+                        try {
+                          const res = await fetch(`${BACKEND_URL}/issues/${id}/block-user`, {
+                            method: 'PATCH',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                          });
+                          if (res.ok) {
+                            toast.success('User blocked successfully!');
+                            fetchData();
+                          } else {
+                            toast.error('Failed to block user');
+                          }
+                        } catch (e) {
+                          toast.error('Error blocking user');
+                        }
+                      }
+                    }}
+                    className="btn btn-sm w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border-none shadow-none font-bold rounded-xl"
+                  >
+                    Block User
+                  </button>
+                </div>
+              )}
+              {issue.user?.status === 'disabled' && (
+                <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col gap-3">
+                  <div className="flex items-center justify-center bg-rose-50 text-rose-600 font-bold text-xs uppercase tracking-wide py-2 rounded-lg border border-rose-100">
+                    Account Blocked
+                  </div>
+                  {isManager && (
+                    <button 
+                      onClick={async () => {
+                        if (window.confirm('Are you sure you want to unblock this user?')) {
+                          try {
+                            const res = await fetch(`${BACKEND_URL}/issues/${id}/unblock-user`, {
+                              method: 'PATCH',
+                              headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (res.ok) {
+                              toast.success('User unblocked successfully!');
+                              fetchData();
+                            } else {
+                              toast.error('Failed to unblock user');
+                            }
+                          } catch (e) {
+                            toast.error('Error unblocking user');
+                          }
+                        }
+                      }}
+                      className="btn btn-sm w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-none shadow-none font-bold rounded-xl"
+                    >
+                      Unblock User
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-3">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">
                 Issue Summary
               </h3>
-              <p className="text-sm text-slate-700 font-medium mb-2">{issue.device}</p>
-              <p className="text-sm text-slate-500 line-clamp-3">{issue.issue_with_device}</p>
+              <p className="text-sm font-bold text-slate-800 mb-2">{issue.device}</p>
+              <p className="text-sm text-slate-600 flex-grow leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100 overflow-y-auto max-h-[120px]">
+                {issue.issue_with_device}
+              </p>
             </div>
           </div>
+        </div>
+        </div>
 
-          <div className="divider text-slate-400 text-sm">Resolution Controls</div>
+        {/* Resolution Controls Card */}
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 md:p-8">
+          <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+            Resolution Controls
+          </h3>
 
-          {/* Controls */}
-          <div className="bg-base-100 rounded-xl space-y-4">
-
+          <div className="space-y-5">
             <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text font-bold text-slate-700">Current Status</span>
+              <label className="label py-1">
+                <span className="label-text font-bold text-slate-600 text-xs uppercase tracking-wider">Current Status</span>
               </label>
               <select
-                className="select select-bordered w-full bg-slate-50"
+                className="select w-full bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl font-semibold text-slate-700"
                 value={issue.status}
                 onChange={(e) => handleUpdate('status', e.target.value)}
               >
@@ -299,11 +375,11 @@ export const IssueDetail = () => {
             </div>
 
             <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text font-bold text-slate-700">Resolution Action</span>
+              <label className="label py-1">
+                <span className="label-text font-bold text-slate-600 text-xs uppercase tracking-wider">Resolution Action</span>
               </label>
               <select
-                className="select select-bordered w-full bg-slate-50"
+                className="select w-full bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl font-semibold text-slate-700"
                 value={issue.action || ''}
                 onChange={(e) => handleUpdate('action', e.target.value)}
               >
@@ -315,12 +391,11 @@ export const IssueDetail = () => {
             </div>
 
             <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text font-bold text-slate-700">Escalation Level</span>
-                <span className="label-text-alt text-error font-semibold">Priority</span>
+              <label className="label py-1">
+                <span className="label-text font-bold text-slate-600 text-xs uppercase tracking-wider">Escalation Level</span>
               </label>
               <select
-                className="select select-bordered w-full bg-slate-50"
+                className="select w-full bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl font-semibold text-slate-700"
                 value={issue.escalation}
                 onChange={(e) => handleUpdate('escalation', parseInt(e.target.value))}
               >
@@ -330,29 +405,28 @@ export const IssueDetail = () => {
               </select>
             </div>
           </div>
-
         </div>
       </div>
 
       {/* Right Side (React Flow & Graph) */}
-      <div className="w-full lg:w-1/2 flex flex-col gap-4">
+      <div className="w-full xl:w-[55%] flex flex-col gap-6">
         {isManager && (
-          <div className="bg-white rounded-xl shadow-md border border-base-300 p-4 h-64 flex flex-col shrink-0">
-            <h3 className="font-bold text-slate-700 mb-2 px-2 flex justify-between items-center">
-              <span>SLA Tracking (Time vs Action)</span>
-              <span className="text-xs text-slate-400 font-normal">Elapsed Hours since Raised</span>
-            </h3>
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 flex flex-col shrink-0 min-h-[300px]">
+            <div className="mb-4">
+              <h3 className="font-black text-slate-800 text-lg">SLA Tracking</h3>
+              <p className="text-sm text-slate-500 mt-1">Elapsed Hours since Raised vs Action</p>
+            </div>
             <div className="flex-grow w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={graphData} margin={{ top: 15, right: 20, bottom: 5, left: 0 }}>
-                  <Line type="monotone" dataKey="time" stroke="#3b82f6" strokeWidth={3} activeDot={{ r: 8, fill: '#1d4ed8' }} />
-                  <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} tickLine={false} axisLine={{ stroke: '#cbd5e1' }} />
-                  <YAxis tick={{ fontSize: 12, fill: '#64748b' }} tickLine={false} axisLine={false} />
+                <LineChart data={graphData} margin={{ top: 10, right: 20, bottom: 5, left: -20 }}>
+                  <Line type="monotone" dataKey="time" stroke="#3b82f6" strokeWidth={3} activeDot={{ r: 8, fill: '#1d4ed8', stroke: '#fff', strokeWidth: 2 }} />
+                  <CartesianGrid stroke="#f1f5f9" strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b', fontWeight: 600 }} tickLine={false} axisLine={{ stroke: '#e2e8f0' }} dy={10} />
+                  <YAxis tick={{ fontSize: 12, fill: '#64748b' }} tickLine={false} axisLine={false} dx={-10} />
                   <Tooltip
                     formatter={(value) => [`${value} hrs`, 'Elapsed Time']}
                     labelFormatter={(label) => `Action: ${label}`}
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -360,11 +434,14 @@ export const IssueDetail = () => {
           </div>
         )}
 
-        <div className="flex-grow bg-white rounded-xl shadow-md border border-base-300 overflow-hidden relative min-h-[400px]">
-          <h3 className="absolute top-4 left-6 z-10 font-bold text-slate-700 bg-white/90 px-4 py-2 rounded-lg shadow-sm border border-slate-100 backdrop-blur-sm flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            Activity Timeline
-          </h3>
+        <div className="flex-grow bg-white rounded-3xl shadow-sm border border-slate-200/60 overflow-hidden relative min-h-[500px]">
+          <div className="absolute top-6 left-6 z-10 bg-white/95 backdrop-blur shadow-sm border border-slate-100 rounded-xl px-5 py-3 flex items-center gap-3">
+            <div className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </div>
+            <h3 className="font-bold text-slate-800 tracking-wide text-sm uppercase">Activity Timeline</h3>
+          </div>
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -374,9 +451,9 @@ export const IssueDetail = () => {
             fitViewOptions={{ padding: 0.5 }}
             className="bg-slate-50/50"
           >
-            <Background color="#cbd5e1" gap={20} size={1.5} />
-            <Controls className="bg-white border-slate-200 shadow-sm rounded-lg" />
-            <MiniMap nodeStrokeWidth={3} className="bg-white border-slate-200 shadow-sm rounded-lg" />
+            <Background color="#cbd5e1" gap={24} size={2} />
+            <Controls className="bg-white border-slate-200 shadow-sm rounded-xl overflow-hidden" />
+            <MiniMap nodeStrokeWidth={3} maskColor="rgba(248, 250, 252, 0.7)" className="bg-white border-slate-200 shadow-sm rounded-xl overflow-hidden" />
           </ReactFlow>
         </div>
       </div>

@@ -120,9 +120,9 @@ export class AuthService {
             );
         }
 
-        if (user.status !== 'active') {
+        if (user.status === 'deleted') {
             throw new UnauthorizedException(
-                'User account is disabled',
+                'User account is deleted',
             );
         }
 
@@ -133,7 +133,8 @@ export class AuthService {
             roles: roleNames,
             firstname: user.firstname,
             lastname: user.lastname,
-            phone: user.phone
+            phone: user.phone,
+            status: user.status
         };
 
         return {

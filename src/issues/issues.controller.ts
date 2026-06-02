@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Body, Req, Query, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Req, Query, Param, UseGuards, ForbiddenException } from '@nestjs/common';
 import { IssuesService } from './issues.service';
 import { CreateIssueDto } from './dto/create-issue.dto';
 import { EmployeeGuard } from '../roles/guards/employee.guard';
@@ -9,6 +9,9 @@ export class IssuesController {
 
   @Post()
   async create(@Req() req: any, @Body() createIssueDto: CreateIssueDto) {
+    if (req.user.status === 'disabled') {
+       throw new ForbiddenException('Your account is restricted from creating new issues.');
+    }
     return this.issuesService.create(req.user.id, createIssueDto);
   }
 
@@ -50,6 +53,18 @@ export class IssuesController {
     @Body() updates: { status?: string; action?: string; escalation?: number }
   ) {
     return this.issuesService.updateIssue(id, updates);
+  }
+
+  @Patch(':id/block-user')
+  @UseGuards(EmployeeGuard)
+  async blockUser(@Param('id') id: string) {
+    return this.issuesService.blockUser(id);
+  }
+
+  @Patch(':id/unblock-user')
+  @UseGuards(EmployeeGuard)
+  async unblockUser(@Param('id') id: string) {
+    return this.issuesService.unblockUser(id);
   }
 
   @Get()

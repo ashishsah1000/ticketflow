@@ -31,7 +31,7 @@ export class Product {
   ratings: number;
 
   @Column({ name: 'complainCount', nullable: true })
-  complainCount: string;
+  complainCount: number;
 
   @Column('text', { nullable: true })
   description: string;

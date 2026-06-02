@@ -10,6 +10,7 @@ import AdminUsers from './pages/admin/Users';
 import Dashboard from './pages/dashboard/dashboard';
 import IssueDetail from './pages/issue/IssueDetail';
 import AnalyticsPage from './pages/manager/AnalyticsPage';
+import ProductsPage from './pages/products/ProductsPage';
 
 const ProtectedRoute = () => {
   const { isAuthenticated, loading } = useAuth();
@@ -31,6 +32,7 @@ function App() {
           <Route path="/" element={<Layout />}>
             {/* Common Routes */}
             <Route index element={<Home />} />
+            <Route path="products" element={<ProductsPage />} />
             
             {/* Public Routes (only accessible if NOT logged in) */}
             <Route element={<PublicRoute />}>

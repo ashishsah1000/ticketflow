@@ -4,6 +4,8 @@ import {
     Body,
     Controller,
     Post,
+    Get,
+    Req,
 } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
@@ -35,5 +37,23 @@ export class AuthController {
         return this.authService.login(
             loginDto,
         );
+    }
+
+    @Get('me')
+    async me(@Req() req: any) {
+        const user = await this.authService.findById(req.user.sub);
+        if (user) {
+            return {
+                id: user.id,
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email,
+                phone: user.phone,
+                status: user.status,
+                admin: user.admin,
+                roles: req.user.roles || []
+            };
+        }
+        return req.user;
     }
 }

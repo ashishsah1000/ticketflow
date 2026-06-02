@@ -9,7 +9,7 @@ import IssueStatusPieChart from '../../features/analytics/IssueStatusPieChart';
 
 const AnalyticsPage = () => {
   const { token, user } = useAuth();
-  
+
   const [issues, setIssues] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +21,7 @@ const AnalyticsPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch all issues globally
         const issuesRes = await fetch(`${BACKEND_URL}/issues/all`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -29,9 +29,8 @@ const AnalyticsPage = () => {
         const issuesData = await issuesRes.json();
         if (issuesRes.ok) setIssues(issuesData);
 
-        // Fetch products. Since ProductCatalog paginates, we can fetch a large limit here
-        // or a specific endpoint if the backend supported it. We'll fetch 1000 items to get a good dataset.
-        const productsRes = await fetch(`${BACKEND_URL}/products?page=1&limit=1000`);
+        // Fetch products. We fetch top complained products by sorting descending
+        const productsRes = await fetch(`${BACKEND_URL}/products?page=1&limit=1000&sort=complaints`);
         const productsData = await productsRes.json();
         if (productsRes.ok) setProducts(productsData.data || []);
 
@@ -58,7 +57,7 @@ const AnalyticsPage = () => {
   return (
     <div className="w-full bg-slate-50 min-h-screen p-6 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
           <div>
@@ -73,19 +72,19 @@ const AnalyticsPage = () => {
 
         {/* 2x2 Grid for Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
+
           {/* Component 1: Issues per day */}
           <IssuesPerDayChart issues={issues} />
 
           {/* Component 2: Companies with most issues */}
-          <CompaniesMostIssuesChart products={products} />
+          { }
 
           {/* Component 4: Custom pie chart (fits nicely in half width) */}
           <IssueStatusPieChart issues={issues} />
 
           {/* Component 3: Paginated products (made full width for better readability on desktop) */}
           <ProductIssuesPaginatedChart products={products} />
-          
+
         </div>
 
       </div>

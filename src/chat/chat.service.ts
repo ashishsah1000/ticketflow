@@ -32,10 +32,16 @@ export class ChatService {
         
         try {
           const issue = await this.issuesService.findByTokenId(searchId);
+          const activities = await this.issuesService.getActivities(issue.id.toString());
           contextData.complaint = {
             id: searchId,
             status: issue.status,
             action: issue.action,
+            activities: activities.map(a => ({
+              type: a.activity_type,
+              details: a.details,
+              date: a.created_at
+            }))
           };
         } catch (e) {
           contextData.error = 'not_found';

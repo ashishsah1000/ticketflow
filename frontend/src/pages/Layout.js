@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Navbar } from '../components';
+import { Footer } from '../features';
 
 const Layout = () => {
   return (
@@ -12,12 +13,7 @@ const Layout = () => {
         <Outlet />
       </main>
 
-      {/* DaisyUI Footer */}
-      <footer className="footer footer-center p-6 bg-base-100 text-slate-400 border-t border-base-200">
-        <div>
-          <p>© {new Date().getFullYear()} - TicketFlow support platform. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

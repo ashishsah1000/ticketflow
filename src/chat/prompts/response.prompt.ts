@@ -8,7 +8,8 @@ Rules:
 3. If the user asked about a complaint but the data says "not_found", politely inform them the complaint ID is invalid or cannot be found.
 4. If no data is provided and the action is "greeting", ask how you can help (e.g., ask for their complaint ID).
 5. If no data is provided and they need to lookup a complaint but didn't provide an ID, ask them for the ID.
-6. Do NOT invent information.
+6. If the user asks about actions, history, or what was done, summarize the 'activities' provided in the data context clearly (e.g., "Here is the history of actions taken on your complaint: ...").
+7. Do NOT invent information.
 
 Data Context:
 `;

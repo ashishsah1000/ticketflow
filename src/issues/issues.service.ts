@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Issue } from './entities/issue.entity';
 import { IssueActivity } from './entities/issue-activity.entity';
 import { CreateIssueDto } from './dto/create-issue.dto';
+import { User } from '../users/entities/user.entity';
+import { UserStatus } from '../users/enums/user-status.enum';
 
 @Injectable()
 export class IssuesService {
@@ -12,9 +14,16 @@ export class IssuesService {
     private readonly issueRepository: Repository<Issue>,
     @InjectRepository(IssueActivity)
     private readonly activityRepository: Repository<IssueActivity>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async create(userId: string, createIssueDto: CreateIssueDto) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (user && user.status === UserStatus.DISABLED) {
+      throw new ForbiddenException('Your account is restricted from creating new issues.');
+    }
+
     const generateToken = () => {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let result = '';
@@ -130,5 +139,33 @@ export class IssuesService {
     }
 
     return saved;
+  }
+
+  async blockUser(id: string) {
+    const issue = await this.findOne(id);
+    if (!issue.user) {
+      throw new NotFoundException('User associated with this issue not found');
+    }
+    issue.user.status = UserStatus.DISABLED;
+    await this.userRepository.save(issue.user);
+    
+    // Log activity
+    await this.addActivity(id, 'user_blocked', 'User account has been restricted from creating new issues.');
+    
+    return { success: true, message: 'User has been blocked' };
+  }
+
+  async unblockUser(id: string) {
+    const issue = await this.findOne(id);
+    if (!issue.user) {
+      throw new NotFoundException('User associated with this issue not found');
+    }
+    issue.user.status = UserStatus.ACTIVE;
+    await this.userRepository.save(issue.user);
+    
+    // Log activity
+    await this.addActivity(id, 'user_unblocked', 'User account restriction has been lifted.');
+    
+    return { success: true, message: 'User has been unblocked' };
   }
 }

@@ -16,9 +16,10 @@ export class ProductsService {
     search?: string;
     category?: string;
     companyIds?: number[];
+    sort?: string;
   }) {
     const page = Math.max(1, options.page);
-    const limit = Math.max(1, Math.min(100, options.limit)); // limit max to 100 for safety
+    const limit = Math.max(1, Math.min(2000, options.limit)); // limit max to 2000 for analytics
     const skip = (page - 1) * limit;
 
     const queryBuilder = this.productRepository.createQueryBuilder('product');
@@ -43,7 +44,12 @@ export class ProductsService {
     }
 
     // Order by name as a default sorting rule
-    queryBuilder.orderBy('product.name', 'ASC');
+    if (options.sort === 'complaints') {
+      // Cast to integer to properly sort numerical values stored as text/varchar in sqlite
+      queryBuilder.orderBy('CAST(product.complainCount AS INTEGER)', 'DESC');
+    } else {
+      queryBuilder.orderBy('product.name', 'ASC');
+    }
 
     queryBuilder.skip(skip).take(limit);
 

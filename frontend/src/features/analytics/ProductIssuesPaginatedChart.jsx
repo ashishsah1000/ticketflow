@@ -10,13 +10,7 @@ const ProductIssuesPaginatedChart = ({ products }) => {
     if (!products || products.length === 0) return [];
     
     const parsed = products.map(product => {
-      let count = 0;
-      if (product.complainCount && product.complainCount !== 'N/A') {
-        const match = String(product.complainCount).match(/\d+/);
-        if (match) {
-          count = parseInt(match[0], 10);
-        }
-      }
+      const count = Number(product.complainCount) || 0;
       return {
         name: product.name,
         company: product.store || 'Unknown',

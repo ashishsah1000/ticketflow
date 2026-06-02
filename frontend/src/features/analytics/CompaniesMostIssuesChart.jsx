@@ -10,15 +10,7 @@ const CompaniesMostIssuesChart = ({ products }) => {
     const companyMap = {};
     
     products.forEach(product => {
-      // Parse complainCount safely, handling values like "23 Reviews" or "1k Reviews"
-      let count = 0;
-      if (product.complainCount && product.complainCount !== 'N/A') {
-        // extract numbers
-        const match = String(product.complainCount).match(/\d+/);
-        if (match) {
-          count = parseInt(match[0], 10);
-        }
-      }
+      let count = Number(product.complainCount) || 0;
       
       const storeName = product.store || 'Unknown';
       companyMap[storeName] = (companyMap[storeName] || 0) + count;

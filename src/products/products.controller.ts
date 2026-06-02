@@ -4,7 +4,7 @@ import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
 
   @Public()
   @Get()
@@ -14,6 +14,7 @@ export class ProductsController {
     @Query('search') search?: string,
     @Query('category') category?: string,
     @Query('companyIds') companyIds?: string,
+    @Query('sort') sort?: string,
   ) {
     const parsedPage = page ? parseInt(page, 10) : 1;
     const parsedLimit = limit ? parseInt(limit, 10) : 10;
@@ -27,6 +28,7 @@ export class ProductsController {
       search,
       category,
       companyIds: parsedCompanyIds,
+      sort,
     });
   }
 
